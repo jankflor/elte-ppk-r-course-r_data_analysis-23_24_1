@@ -17,6 +17,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(stringr)
 ```
 
 # Background
@@ -32,7 +33,9 @@ Note: There are several different ways to solve these tasks, feel free to come u
 Read the cocktail dataset from: <https://github.com/nthun/cocktail-balance> You can also find the codebook there.
 
 ```{r}
+cocktail_data <- read_tsv('cocktail_data.tsv')
 
+cocktail_data
 ```
 
 ## 2. Transform the data table and clean the ingredient variable!
@@ -40,6 +43,9 @@ Read the cocktail dataset from: <https://github.com/nthun/cocktail-balance> You 
 The ingredients are currently in a single cell for each cocktail. It would be better to put them in separate rows. Also, the variable should be cleaned of all quantities (e.g. 1/2 oz, 2 dashes, etc.), and the indicator of alcohol content (e.g. 47.3% abv). You will need to use this cleaned table in later tasks.
 
 ```{r}
+cocktail_data %>%
+  pivot_longer(ingredients, names_to = "ingredient", values_to = "value")
+
 
 ```
 
