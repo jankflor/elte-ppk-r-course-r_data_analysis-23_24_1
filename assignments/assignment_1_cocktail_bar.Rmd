@@ -44,7 +44,7 @@ The ingredients are currently in a single cell for each cocktail. It would be be
 
 ```{r}
 cocktail_data %>%
-  pivot_longer(ingredients, names_to = "ingredient", values_to = "value")
+  pivot_longer(ingredients, names_to = "ingredients", values_to = "value")
 
 
 ```
