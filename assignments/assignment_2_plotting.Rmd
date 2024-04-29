@@ -45,6 +45,16 @@ Notes:
 -   The line size is 1.2, the colors are from the brewer "Dark2" palette. The theme is set to minimal.
 
 ```{r}
+phd_by_field <- read.csv('phd_by_field.csv')
+
+as.numeric(phd_by_field$year)
+
+phd_by_broad <- phd_by_field %>%
+  group_by(broad_field) %>%
+  summarize(totalphds = sum(n_phds))
+
+ggplot(phd_by_broad, aes(x = year, y = totalphds)) +
+  geom_line()
 
 ```
 
