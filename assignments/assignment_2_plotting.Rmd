@@ -20,6 +20,8 @@ You will have to create 3 plots based on the datasets and instructions detailed 
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(tidytuesdayR)
+install.packages("viridis")
+library(viridis)
 ```
 
 ## Task 1: Climbing expeditions
@@ -32,18 +34,21 @@ The 2020-09-22 TidyTueday datasets are about climbing expeditions. From the thre
 
 ```{r}
 expeditions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-22/expeditions.csv')
+glimpse(expeditions)
 
-as.factor(expeditions$peak_name)
+theme_set(theme_light())
 
-exp_top15 <- expeditions %>%
-  fct_lump_n(peak_name, n = 15, other_level = "Other")
-
-exp_top15 <- fct_lump_n(expeditions$peak_name, n = 15, other_level = "Other")
-
-
-
-
-
+expeditions %>%
+  filter(peak_name == fct_lump_n(peak_name, n = 15)) %>%
+  group_by(season) %>%
+  count(peak_name) %>%
+  mutate(peak_name = fct_reorder(peak_name, n)) %>%
+  ggplot(aes(x = reorder(peak_name, n), y = n, fill = season)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "The 15 most popular peaks stacked by season of expedition", x = NULL, y = "Number of expeditions") +
+  theme(legend.position = "bottom") +
+  scale_fill_viridis(discrete = TRUE)
 ```
 
 ## Task 2: PhDs awarded
@@ -57,15 +62,19 @@ Notes:
 -   The line size is 1.2, the colors are from the brewer "Dark2" palette. The theme is set to minimal.
 
 ```{r}
-phd_by_field <- read.csv('phd_by_field.csv')
+phd_by_field <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-02-19/phd_by_field.csv")
+glimpse(phd_by_field)
 
-phd_by_broad <- phd_by_field %>%
-  group_by(broad_field) %>%
-  count()
+theme_set(theme_minimal())
 
-ggplot(phd_by_broad, aes(phd_by_field$year, phd_by_field$n_phds)) +
-  geom_line()
+total_phd_by_year <- phd_by_field %>%
+  filter(n_phds != "NA") %>%
+  group_by(year, broad_field) %>%
+  summarize(total_phd = sum(n_phds))
 
+ggplot(total_phd_by_year, aes(x = year, y = total_phd), color = broad_field) +
+  geom_line() +
+  labs(title = "Number of awarded Ph.D.-s in the US by year", x = NULL, y = NULL)
 ```
 
 ## Task 3: Commute in the US
@@ -79,5 +88,12 @@ Notes:
 -   The point size is 2, . The theme is set to light.
 
 ```{r}
+commute <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-11-05/commute.csv")
+glimpse(commute)
 
+theme_set(theme_light())
+
+all_comm_by_state <- commute %>%
+  group_by(state) %>%
+  summarize(total_n = sum(n))
 ```
