@@ -31,18 +31,18 @@ The 2020-09-22 TidyTueday datasets are about climbing expeditions. From the thre
 -   The bar colors use the viridis palette and light theme.
 
 ```{r}
-expeditions <- read.csv('expeditions.csv')
-expeditions
+expeditions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-22/expeditions.csv')
 
-expeditions_top15 <- fct_lump_n(expeditions$peak_name, n = 15, other_level = "Other")
+as.factor(expeditions$peak_name)
 
-levels(expeditions_top15)
+exp_top15 <- expeditions %>%
+  fct_lump_n(peak_name, n = 15, other_level = "Other")
 
-all_exp <- expeditions %>%
-  group_by(peak_name) %>%
-  summarize(total_exp = sum(expedition_id))
+exp_top15 <- fct_lump_n(expeditions$peak_name, n = 15, other_level = "Other")
 
-all_exp
+
+
+
 
 ```
 
