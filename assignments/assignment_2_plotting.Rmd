@@ -94,6 +94,13 @@ glimpse(commute)
 theme_set(theme_light())
 
 all_comm_by_state <- commute %>%
-  group_by(state) %>%
-  summarize(total_n = sum(n))
+  filter(!state == "Ca") %>%
+  group_by(state, mode) %>%
+  summarize(all_comm = sum(n)) %>%
+  ggplot(aes(mode, all_comm), color = state_region) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+
+all_comm_by_state
 ```
