@@ -45,19 +45,31 @@ cocktail_data
 The ingredients are currently in a single cell for each cocktail. It would be better to put them in separate rows. Also, the variable should be cleaned of all quantities (e.g. 1/2 oz, 2 dashes, etc.), and the indicator of alcohol content (e.g. 47.3% abv). You will need to use this cleaned table in later tasks.
 
 ```{r}
-cocktail_sep <- separate_longer_delim(cocktail_data, ingredients, delim = "<br/>")
+cocktail_fixed <- str_replace_all(cocktail_data$ingredients, "<br>", "<br/>")
 
-remove <- c("oz", "drops", "drop", "drops", "dash", "dashes", "bsp", "(40% abv)", "(50% abv)", "(43% abv)", "(41% abv)", "(45% abv)", "(47% abv)", "(47.4% abv)", "(47.3% abv)", "3/4", "1/2", "1/4", "5/8", "3/8", "6/8", "7/8")
+cocktail_final <- str_replace_all(cocktail_fixed, "<b4/>", "<br/>")
 
-cocktail_no_quan <- str_remove_all(cocktail_sep$ingredients, paste(remove, collapse = "|"))
+cocktail_data_fixed <- cbind(cocktail_data, cocktail_final)
 
-cocktail_no_num <- rm_number(cocktail_no_quan)
+cocktail_data_fixed$ingredients <- NULL
 
-str_replace_all(cocktail_no_num, "()", "")
+cocktail_data_fixed
 
-cocktail_df <- cbind(cocktail_sep, cocktail_no_num)
+cocktail_sep <- separate_longer_delim(cocktail_data_fixed, cocktail_final, delim = "<br/>")
 
-cocktail_df
+cocktail_sep
+
+remove <- c("oz", "drops", "drop", "drops", "dash", "dashes", "bsp", "(40% abv)", "(50% abv)", "(43% abv)", "(41% abv)", "(45% abv)", "(47% abv)", "(47.4% abv)", "(47.3% abv)", "3/4", "1/2", "1/4", "5/8", "3/8", "6/8", "7/8", "[()]")
+
+cocktail_no_quan <- str_remove_all(cocktail_sep$cocktail_final, paste(remove, collapse = "|"))
+
+cocktail_ingredients <- rm_number(cocktail_no_quan)
+
+cocktail_df <- cbind(cocktail_sep, cocktail_ingredients)
+
+cocktail_df$cocktail_final <- NULL
+
+glimpse(cocktail_df)
 ```
 
 ## 3. All ingredients in alphabetical order
@@ -65,7 +77,11 @@ cocktail_df
 Before opening the bar, you need to find a reliable supplier that has all the ingredients. You need to send a list of all possible ingredients you will need. They don't need the quantities (i.e. how many of these are needed), just the names of the ingredients.
 
 ```{r}
+ingredient_list <- cocktail_df[order(cocktail_df$cocktail_ingredients), ] %>%
+  pull(cocktail_ingredients) %>%
+  unique()
 
+ingredient_list
 ```
 
 ## 4. Number of unique ingredients
@@ -73,6 +89,7 @@ Before opening the bar, you need to find a reliable supplier that has all the in
 How many different ingredients you will need?
 
 ```{r}
+summary(ingredient_list)
 
 ```
 
@@ -81,6 +98,8 @@ How many different ingredients you will need?
 What are the 10 most frequently used ingredients? If there are ties, you can list more than 10.
 
 ```{r}
+top10_ingredients <- fct_lump_n(cocktail_df$cocktail_ingredients, n = 10)
+
 
 ```
 
@@ -89,7 +108,9 @@ What are the 10 most frequently used ingredients? If there are ties, you can lis
 Count the number of ingredients and filter all the cocktails that has that many.
 
 ```{r}
-
+cocktail_most_ingredients <- cocktail_df %>%
+  count(name) %>%
+  filter(n == max(n))
 ```
 
 ## 7. How many ingredients appear in only one cocktail (rare ingredient)?
@@ -97,12 +118,18 @@ Count the number of ingredients and filter all the cocktails that has that many.
 Count all cocktails with only one ingredient, and
 
 ```{r}
-
+rare_ingredients <- cocktail_df %>%
+  count(cocktail_ingredients) %>%
+  filter(n == min(n))
 ```
 
 ## 8. Which cocktail has an ingredient that is only used in one cocktail?
 
 ```{r}
+cocktail_df %>%
+  group_by(name) %>%
+  filter(rare_ingredients %in% cocktail_ingredients)
+
 
 ```
 

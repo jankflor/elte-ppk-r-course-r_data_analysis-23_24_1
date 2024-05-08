@@ -69,8 +69,10 @@ theme_set(theme_minimal())
 
 total_phd_by_year <- phd_by_field %>%
   filter(n_phds != "NA") %>%
-  group_by(year, broad_field) %>%
-  summarize(total_phd = sum(n_phds))
+  group_by(broad_field) %>%
+  summarize(total_phd = sum(n_phds)) %>%
+  ggplot(aes(year, total_phd), color = broad_field) +
+  geom_line()
 
 ggplot(total_phd_by_year, aes(x = year, y = total_phd), color = broad_field) +
   geom_line() +
