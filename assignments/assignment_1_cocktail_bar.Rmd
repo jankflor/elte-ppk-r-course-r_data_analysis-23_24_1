@@ -100,7 +100,7 @@ What are the 10 most frequently used ingredients? If there are ties, you can lis
 ```{r}
 top10_ingredients <- fct_lump_n(cocktail_df$cocktail_ingredients, n = 10)
 
-
+top10_ingredients
 ```
 
 ## 6. Which cocktail(s) has/have the most ingredients?
@@ -126,9 +126,11 @@ rare_ingredients <- cocktail_df %>%
 ## 8. Which cocktail has an ingredient that is only used in one cocktail?
 
 ```{r}
-cocktail_df %>%
+cocktail_w_rare <- cocktail_df %>%
   group_by(name) %>%
-  filter(rare_ingredients %in% cocktail_ingredients)
+  filter(cocktail_ingredients %in% rare_ingredients$cocktail_ingredients) %>%
+  pull(name) %>%
+  unique()
 
 
 ```
@@ -136,7 +138,11 @@ cocktail_df %>%
 ## 9. What are the cocktails without rare ingredients?
 
 ```{r}
-  
+cocktail_wo_rare <- cocktail_df %>%
+  group_by(name) %>%
+  filter(!(cocktail_ingredients %in% rare_ingredients$cocktail_ingredients)) %>%
+  pull(name) %>%
+  unique()
 ```
 
 ## 10. Create a cheat sheet for the bartender!
