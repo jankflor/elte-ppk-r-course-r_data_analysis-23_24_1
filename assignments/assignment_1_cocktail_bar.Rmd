@@ -59,7 +59,7 @@ cocktail_sep <- separate_longer_delim(cocktail_data_fixed, cocktail_final, delim
 
 cocktail_sep
 
-remove <- c("oz", "drops", "drop", "drops", "dash", "dashes", "bsp", "(40% abv)", "(50% abv)", "(43% abv)", "(41% abv)", "(45% abv)", "(47% abv)", "(47.4% abv)", "(47.3% abv)", "3/4", "1/2", "1/4", "5/8", "3/8", "6/8", "7/8", "[()]")
+remove <- c("oz", "drops", "drop", "es", "dash", "dashes", "bsp", "(40% abv)", "(50% abv)", "(43% abv)", "(41% abv)", "(45% abv)", "(47% abv)", "(47.4% abv)", "(47.3% abv)", "3/4", "1/2", "1/4", "5/8", "3/8", "6/8", "7/8", "[()]")
 
 cocktail_no_quan <- str_remove_all(cocktail_sep$cocktail_final, paste(remove, collapse = "|"))
 
@@ -98,7 +98,8 @@ summary(ingredient_list)
 What are the 10 most frequently used ingredients? If there are ties, you can list more than 10.
 
 ```{r}
-top10_ingredients <- fct_lump_n(cocktail_df$cocktail_ingredients, n = 10)
+top10_ingredients <- cocktail_df %>%
+  mutate(fct_lump_n(cocktail_ingredients, n = 10))
 
 top10_ingredients
 ```
@@ -140,7 +141,7 @@ cocktail_w_rare <- cocktail_df %>%
 ```{r}
 cocktail_wo_rare <- cocktail_df %>%
   group_by(name) %>%
-  filter(!(cocktail_ingredients %in% rare_ingredients$cocktail_ingredients)) %>%
+  filter(!(name %in% cocktail_w_rare)) %>%
   pull(name) %>%
   unique()
 ```
@@ -158,6 +159,7 @@ tribble(~name, ~Lime, ~`White rum`, ~`Cane sugar`, ~`Coca-cola`, ~Mint, ~Soda,
 ```
 
 ```{r}
+tribble
 
 ```
 
