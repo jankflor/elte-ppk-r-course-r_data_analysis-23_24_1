@@ -61,12 +61,14 @@ Read the dataset used in this assignment. Pay attention to the extension of the 
 ```{r}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-install.packages('XLConnect')
-library(XLConnect)
+install.packages('broom')
+library(broom)
+install.packages("ggfortify")
+library(ggfortify)
+install.packages('car')
+library(car)
 
-pain_df <- loadWorkbook("assignment_3_dataset.xlsx")
-
-glimpse(pain_df)
+glimpse(assignment_3_dataset)
 ```
 
 ## Data and model diagnostics 
@@ -76,7 +78,63 @@ glimpse(pain_df)
 Run an exploratory data analysis (EDA) to investigate the dataset.
 
 ```{r}
+str(assignment_3_dataset)
 
+ggplot(assignment_3_dataset, aes(pain)) +
+  geom_histogram()
+
+ggplot(assignment_3_dataset, aes(age)) +
+  geom_boxplot()
+
+summary(assignment_3_dataset$STAI_trait)
+ggplot(assignment_3_dataset, aes(STAI_trait)) +
+  geom_boxplot()
+
+ggplot(assignment_3_dataset, aes(pain_cat)) +
+  geom_histogram()
+
+ggplot(assignment_3_dataset, aes(cortisol_serum)) +
+  geom_histogram()
+
+ggplot(assignment_3_dataset, aes(cortisol_saliva)) +
+  geom_histogram()
+
+ggplot(assignment_3_dataset, aes(mindfulness)) +
+  geom_density()
+
+ggplot(assignment_3_dataset, aes(weight)) +
+  geom_boxplot()
+
+ggplot(assignment_3_dataset, aes(IQ)) +
+  geom_histogram()
+
+ggplot(assignment_3_dataset, aes(household_income)) +
+  geom_boxplot()
+
+assignment_3_dataset %>%
+  count(sex)
+
+ggplot(assignment_3_dataset, aes(pain, STAI_trait)) +
+  geom_point()
+
+ggplot(assignment_3_dataset, aes(pain, pain_cat)) +
+  geom_point()
+
+ggplot(assignment_3_dataset, aes(pain, cortisol_serum)) +
+  geom_point()
+
+ggplot(assignment_3_dataset, aes(pain, cortisol_saliva)) +
+  geom_point()
+
+ggplot(assignment_3_dataset, aes(pain, mindfulness)) +
+  geom_point()
+
+assignment_3_dataset %>%
+  filter(pain ==! 50) %>%
+  plot(pain, age)
+
+
+plot(assignment_3_dataset)
 ```
 
 #### Correct coding errors
@@ -84,6 +142,8 @@ Run an exploratory data analysis (EDA) to investigate the dataset.
 If you find values in the dataset during the EDA, that are not correct based on the provided descriptions of the variables of the dataset please correct them here.
 
 ```{r}
+pain_df <- assignment_3_dataset %>%
+  str_replace(sex, "woman", "female")
 
 ```
 
@@ -93,6 +153,9 @@ If you find values in the dataset during the EDA, that are not correct based on 
 In order to test the more complex model for outliers and to test the assumptions first build the model.
 
 ```{r}
+model_c <- lm(pain ~ age + sex + STAI_trait + pain_cat + cortisol_serum + cortisol_saliva + mindfulness, data = assignment_3_dataset)
+glance(model_c)
+summary(model_c)
 
 ```
 
@@ -101,7 +164,7 @@ In order to test the more complex model for outliers and to test the assumptions
 Check for outlier values in the model.
 
 ```{r}
-
+autoplot(model_c, which = 4:6)
 ```
 
 #### Checking assumptions
@@ -109,19 +172,21 @@ Check for outlier values in the model.
 Check the normality assumption.
 
 ```{r}
-
+plot(model_c, 2)
 ```
 
 Check the linearity assumption.
 
 ```{r}
+ggplot(model_c, aes(pain, age)) +
+  geom_point()
 
 ```
 
 Check the homoscedasticty assumption (homogeneity of variance).
 
 ```{r}
-
+plot(model_c, 1)
 ```
 
 Check the multicollinearity assumption.
@@ -133,7 +198,7 @@ https://statisticalhorizons.com/multicollinearity
 http://blog.minitab.com/blog/understanding-statistics/handling-multicollinearity-in-regression-analysis
 
 ```{r}
-
+vif(model_c)
 ```
 
 ### Making decision based on model diagnostics
