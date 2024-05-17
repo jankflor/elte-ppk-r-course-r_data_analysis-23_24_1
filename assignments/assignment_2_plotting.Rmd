@@ -42,8 +42,8 @@ expeditions %>%
   filter(peak_name == fct_lump_n(peak_name, n = 15)) %>%
   group_by(season) %>%
   count(peak_name) %>%
-  mutate(peak_name = fct_reorder(peak_name, n)) %>%
-  ggplot(aes(x = reorder(peak_name, n), y = n, fill = season)) +
+  mutate(peak_desc = fct_reorder(peak_name, n)) %>%
+  ggplot(aes(x = reorder(peak_desc, n), y = n, fill = season)) +
   geom_col() +
   coord_flip() +
   labs(title = "The 15 most popular peaks stacked by season of expedition", x = NULL, y = "Number of expeditions") +
@@ -97,8 +97,9 @@ theme_set(theme_light())
 
 all_comm_by_state <- commute %>%
   filter(!state == "Ca") %>%
-  group_by(state, mode) %>%
-  summarize(all_comm = sum(n)) %>%
+  mutate(transp = if_else(mode == "Bike", 1, 0)) %>%
+  group_by(state) %>%
+  summarize(all_comm = sum(transp)) %>%
   ggplot(aes(mode, all_comm), color = state_region) +
   geom_point() +
   scale_x_log10() +

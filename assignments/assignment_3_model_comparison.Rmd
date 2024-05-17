@@ -59,7 +59,14 @@ In your discussion of the findings, briefly interpret the results of the above a
 Read the dataset used in this assignment. Pay attention to the extension of the datafile.
 
 ```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+install.packages('XLConnect')
+library(XLConnect)
 
+pain_df <- loadWorkbook("assignment_3_dataset.xlsx")
+
+glimpse(pain_df)
 ```
 
 ## Data and model diagnostics 
