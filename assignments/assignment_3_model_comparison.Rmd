@@ -67,8 +67,12 @@ install.packages("ggfortify")
 library(ggfortify)
 install.packages('car')
 library(car)
+install.packages("lmtest")
+library(lmtest)
+install.packages("AICcmodavg")
+library(AICcmodavg)
 
-glimpse(assignment_3_dataset)
+assignment_3_dataset <- readxl::read_excel("C:/Users/flora/OneDrive/Dokumentumok/GitHub/elte-ppk-r-course-r_data_analysis-23_24_1/assignment_3_dataset.xls")
 ```
 
 ## Data and model diagnostics 
@@ -78,63 +82,106 @@ glimpse(assignment_3_dataset)
 Run an exploratory data analysis (EDA) to investigate the dataset.
 
 ```{r}
-str(assignment_3_dataset)
+head(assignment_3_dataset)
+
+summary(assignment_3_dataset)
+
+theme_set(theme_light())
 
 ggplot(assignment_3_dataset, aes(pain)) +
-  geom_histogram()
+  geom_histogram() +
+  labs(title = "Histogram of pain values")
 
 ggplot(assignment_3_dataset, aes(age)) +
-  geom_boxplot()
+  geom_histogram() +
+  labs(title = "Histogram of age values")
 
-summary(assignment_3_dataset$STAI_trait)
 ggplot(assignment_3_dataset, aes(STAI_trait)) +
-  geom_boxplot()
+  geom_histogram() +
+  labs(title = "Histogram of STAI values")
 
 ggplot(assignment_3_dataset, aes(pain_cat)) +
-  geom_histogram()
+  geom_histogram() +
+  labs(title = "Histogram of pain catastrophizing values")
 
 ggplot(assignment_3_dataset, aes(cortisol_serum)) +
-  geom_histogram()
+  geom_histogram() +
+  labs(title = "Histogram of serum cortisol values")
 
 ggplot(assignment_3_dataset, aes(cortisol_saliva)) +
-  geom_histogram()
+  geom_histogram() +
+  labs(title = "Histogram of saliva cortisol values")
 
 ggplot(assignment_3_dataset, aes(mindfulness)) +
-  geom_density()
-
-ggplot(assignment_3_dataset, aes(weight)) +
-  geom_boxplot()
-
-ggplot(assignment_3_dataset, aes(IQ)) +
-  geom_histogram()
-
-ggplot(assignment_3_dataset, aes(household_income)) +
-  geom_boxplot()
+  geom_histogram() +
+  labs(title = "Histogram of mindfulness values")
 
 assignment_3_dataset %>%
   count(sex)
 
-ggplot(assignment_3_dataset, aes(pain, STAI_trait)) +
-  geom_point()
-
-ggplot(assignment_3_dataset, aes(pain, pain_cat)) +
-  geom_point()
-
-ggplot(assignment_3_dataset, aes(pain, cortisol_serum)) +
-  geom_point()
-
-ggplot(assignment_3_dataset, aes(pain, cortisol_saliva)) +
-  geom_point()
-
-ggplot(assignment_3_dataset, aes(pain, mindfulness)) +
-  geom_point()
+assignment_3_dataset %>%
+  filter(pain < 50) %>%
+  ggplot(aes(pain, STAI_trait, color = sex)) +
+  geom_point() +
+  labs(title = "Relationship of pain and STAI values by gender")
 
 assignment_3_dataset %>%
-  filter(pain ==! 50) %>%
-  plot(pain, age)
+  filter(pain < 50) %>%
+  ggplot(aes(pain, pain_cat, color = sex)) +
+  geom_point() +
+  labs(title = "Relationship of pain and catastrophizing values by gender")
 
+assignment_3_dataset %>%
+  filter(pain < 50) %>%
+  ggplot(aes(pain, cortisol_serum, color = sex)) +
+  geom_point() +
+  labs(title = "Relationship of pain values and serum cortisol by gender")
 
-plot(assignment_3_dataset)
+assignment_3_dataset %>%
+  filter(pain < 50) %>%
+  ggplot(aes(pain, cortisol_saliva, color = sex)) +
+  geom_point() +
+  labs(title = "Relationship of pain values and saliva cortisol levels by gender")
+
+assignment_3_dataset %>%
+  filter(pain < 50) %>%
+  ggplot(aes(pain, mindfulness, color = sex)) +
+  geom_point() +
+  labs(title = "Relationship of pain and mindfulness values by gender")
+
+assignment_3_dataset %>%
+  filter(pain < 50) %>%
+  ggplot(aes(pain, age, color = sex)) +
+  geom_point() +
+  labs(title = "Relationship of pain values and age by gender")
+
+round(cor(assignment_3_dataset[c('pain', 'STAI_trait', 'pain_cat', 'cortisol_serum', 'cortisol_saliva', 'mindfulness')]), 2)
+
+sapply(assignment_3_dataset, function(x) sum(is.na(x)))
+
+Q1 <- quantile(assignment_3_dataset$pain, 0.25)
+Q3 <- quantile(assignment_3_dataset$pain, 0.75)
+IQR <- Q3 - Q1
+
+outliers_pain <- subset(assignment_3_dataset, assignment_3_dataset$pain < (Q1 - 1.5*IQR) | assignment_3_dataset$pain > (Q3 + 1.5*IQR))
+
+outliers_pain
+
+Q1 <- quantile(assignment_3_dataset$age, 0.25)
+Q3 <- quantile(assignment_3_dataset$age, 0.75)
+IQR <- Q3 - Q1
+
+outliers_age <- subset(assignment_3_dataset, assignment_3_dataset$age < (Q1 - 1.5*IQR) | assignment_3_dataset$pain > (Q3 + 1.5*IQR))
+
+outliers_age
+
+Q1 <- quantile(assignment_3_dataset$pain_cat, 0.25)
+Q3 <- quantile(assignment_3_dataset$pain_cat, 0.75)
+IQR <- Q3 - Q1
+
+outliers_paincat <- subset(assignment_3_dataset, assignment_3_dataset$pain_cat < (Q1 - 1.5*IQR) | assignment_3_dataset$pain_cat > (Q3 + 1.5*IQR))
+
+outliers_paincat
 ```
 
 #### Correct coding errors
@@ -142,8 +189,17 @@ plot(assignment_3_dataset)
 If you find values in the dataset during the EDA, that are not correct based on the provided descriptions of the variables of the dataset please correct them here.
 
 ```{r}
-pain_df <- assignment_3_dataset %>%
-  str_replace(sex, "woman", "female")
+pain_df_recoded <- assignment_3_dataset %>%
+  mutate(sex = fct_recode(sex, "female" = "woman"))
+
+levels(pain_df_recoded$sex)
+
+pain_df <- pain_df_recoded %>%
+  filter(pain < 50)
+
+summary(pain_df)
+
+data <- pain_df[ , c("age", "pain", "sex", "STAI_trait", "pain_cat", "cortisol_serum", "cortisol_saliva", "mindfulness")]
 
 ```
 
@@ -153,7 +209,7 @@ pain_df <- assignment_3_dataset %>%
 In order to test the more complex model for outliers and to test the assumptions first build the model.
 
 ```{r}
-model_c <- lm(pain ~ age + sex + STAI_trait + pain_cat + cortisol_serum + cortisol_saliva + mindfulness, data = assignment_3_dataset)
+model_c <- lm(pain ~ age + sex + STAI_trait + pain_cat + cortisol_serum + cortisol_saliva + mindfulness, data = data)
 glance(model_c)
 summary(model_c)
 
@@ -165,6 +221,10 @@ Check for outlier values in the model.
 
 ```{r}
 autoplot(model_c, which = 4:6)
+
+CooksD <- cooks.distance(model_c)
+influential <- CooksD[(CooksD > (3 * mean(CooksD, na.rm = TRUE)))]
+influential
 ```
 
 #### Checking assumptions
@@ -178,9 +238,7 @@ plot(model_c, 2)
 Check the linearity assumption.
 
 ```{r}
-ggplot(model_c, aes(pain, age)) +
-  geom_point()
-
+pairs(data)
 ```
 
 Check the homoscedasticty assumption (homogeneity of variance).
@@ -206,13 +264,20 @@ vif(model_c)
 If based on the assumption tests you decide to drop a predictor variable you should do that here. Create your updated model.
 
 ```{r}
+data2 <- pain_df[ , c("age", "pain", "sex", "STAI_trait", "pain_cat", "cortisol_serum", "mindfulness")]
 
+model_2 <- lm(pain ~ age + sex + STAI_trait + pain_cat + cortisol_serum + mindfulness, data = data2)
+summary(model_2)
 ```
 
 #### Checking outliers of the updated model
 
 ```{r}
+autoplot(model_2, which = 4:6)
 
+CooksD2 <- cooks.distance(model_2)
+influential <- CooksD2[(CooksD2 > (3 * mean(CooksD2, na.rm = TRUE)))]
+influential
 ```
 
 #### Checking assumptions of the updated model
@@ -220,25 +285,25 @@ If based on the assumption tests you decide to drop a predictor variable you sho
 Normality assumption
 
 ```{r}
-
+plot(model_2, 2)
 ```
 
 Linearity assumption
 
 ```{r}
-
+pairs(data2)
 ```
 
 Homoscedasticty assumption (homogeneity of variance)
 
 ```{r}
-
+plot(model_2, 1)
 ```
 
 Multicollinearity assumption
 
 ```{r}
-
+vif(model_2)
 ```
 
 ## Model comparison
@@ -246,18 +311,60 @@ Multicollinearity assumption
 Create the simple model and get the results of the model that needs to be reported based on the What to report section.
 
 ```{r}
-
+model_simple <- lm(pain ~ age + sex, data = pain_df)
+summary(model_simple)
 ```
 
 Create the more complex model based on the results of the model diagnostics. Also, get the results that needs to be reported based on the What to report section.
 
 ```{r}
+model_complex <- lm(pain ~ age + sex + STAI_trait + pain_cat + cortisol_serum + mindfulness, data = data2)
+summary(model_complex)
 
+confint(model_complex, 'age', level = 0.95)
+confint(model_complex, 'sex', level = 0.95)
+confint(model_complex, 'STAI_trait', level = 0.95)
+confint(model_complex, 'pain_cat', level = 0.95)
+confint(model_complex, 'cortisol_serum', level = 0.95)
+confint(model_complex, 'mindfulness', level = 0.95)
+
+tidy(model_complex)
+
+model_complex_std <- lm(scale(pain) ~ scale(age) + sex + scale(STAI_trait) + scale(pain_cat) + scale(cortisol_serum) + scale(mindfulness), data = data2)
+summary(model_complex_std)
 ```
 
 Compare the two models.
 
 ```{r}
+anova(model_simple, model_complex)
+
+lrtest(model_complex, model_simple)
+
+models <- list(model_simple, model_complex)
+
+mod.names <- c('age.sex', 'age.sex.STAI.cat.cort.mind')
+
+aictab(cand.set = models, modnames = mod.names)
 
 ```
 
+##Report
+
+In the above analysis, it was explored how certain psychological and hormonal variables (such as state STAI value, pain catastrophizing or serum cortisol levels) affect reported pain levels in this sample. This more complex model was compared to a simpler model, with only participants' age and sex as predictor variables on reported pain levels.
+
+According to the exploratory data analysis, one two coding errors were found. One, with 'female' reported as 'woman', was corrected. The other one, where the reported pain level fell out of the range of the allowed range, was the most influential outlier, therefore it was removed from the dataset.
+
+The first model, including pain as the outcome variable and age, sex, trait STAI value, pain catastrophizing value, serum cortisol level, salivary cortisol level and mindfulness value as predictor variables, yielded a significant result (adj.R2 = 0.3354, F = 12.39, df = 151, p = 1.768e-12). However, the multicollinearity assumption was violated, with serum cortisol and salivary cortisol levels showing a high correlation (VIF = 6.065266 and VIF = 6.622923 respectively). Therefore, salivary cortisol was excluded from the final model, as one cortisol measure yielded enough predictive power.
+
+The final model consisted of pain as the outcome variable, and age, sex, trait STAI value, pain catastrophizing value, serum cortisol level and mindfulness value as predictor variables. This model was statistically significant (adj.R2 = 0.3265, F = 13.77, df = 152, p = 1.841e-12), explaining 32.65% of the variance of reported pain levels in this sample. Pain catastrophizing had a positive, statistically significant effect on reported pain levels (unstandardized B = 0.08459, CI lower = 0.028587, CI higher = 0.1405993, standardized B = 0.26611, p = 0.00331). Serum cortisol levels also had a positive, statistically significant effect on reported pain levels (unstandardized B = 0.53519, CI lower = 0.290671, CI higher = 0.779706, standardized B = 0.34851, p = 2.76e-05).
+
+The regression equation of the more complex model is as follows:
+
+Pain Level = 1.97850 + -0.03592*(age) + 0.31090*(sex) + -0.01130*(trait STAI) + 0.08459*(pain catastrophizing) + 0.53519*(serum cortisol levels) + -0.14588*(minfulness).
+
+Comparing this, more complex model with the simple model (where age and sex predict pain levels), it is shown that the complex model has a better fit: it explains 33.65% of the variance of reported pain levels, whereas the simpler model only explains 7.61% of its variance. So the complex model explains more variance of the outcome variable (F = 15.501, p = 1.175e-10). The likelihood ratio test shows more likelihood of the more complex model happening (p = 4.347e-11). The Akaike Information Criteria analysis shows that the more complex model has less AIC value, therefore it is considered a better fit.
+
+##Discussion
+
+According to the statistical analyses of the above data, it can be concluded that including psychological and hormonal measures to explain the variance of reported pain levels is a reasonable idea. In the complex model, pain catastrophizing and serum cortisol levels showed a statistically significant impact on pain levels, signifying that higher catastrophizing and higher cortisol levels might indicate a higher sensitivity to pain reception. Since a larger proportion of the variance of pain levels was explained by the complex model, I think substantially more predictive power was gained by using this extended model.
