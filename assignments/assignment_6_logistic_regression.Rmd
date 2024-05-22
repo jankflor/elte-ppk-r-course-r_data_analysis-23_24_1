@@ -178,6 +178,8 @@ ksl_df <- data.table(
 ```{r}
 null_model <- glm(Survived ~ Parch, data = titanic_dataset, family = "binomial")
 
+summary(null_model)
+
 plt_survive_vs_parch_base <- ggplot(titanic_dataset, aes(Parch, Survived)) +
   geom_point() +
   geom_smooth(method = "glm", se = FALSE, method.args = list(family = binomial))
@@ -195,13 +197,20 @@ prediction_data %>%
 
 predicted_response <- round(fitted(null_model))
 
+explanatory_data <- ksl_df
+
+prediction_data <- explanatory_data %>%
+  mutate(Survived = predict(null_model, explanatory_data, type = "response"), most_likely_response = round(Survived), odds_ratio = Survived / (1 - Survived), log_odds_ratio = log(odds_ratio), log_odds_ratio2 = predict(null_model, explanatory_data))
+
 
 ```
 
 ## Building the model
 
 ```{r}
+model_2 <- glm(Survived ~ Parch + SibSp + Pclass + Sex + Fare + Embarked, data = titanic_dataset, family = "binomial")
 
+summary(model_2)
 ```
 
 # Check the assumptions

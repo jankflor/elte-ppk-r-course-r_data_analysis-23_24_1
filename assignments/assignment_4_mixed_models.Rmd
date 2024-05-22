@@ -9,6 +9,11 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+install.packages("haven")
+library(haven)
+install.packages("lme4")
+library(lme4)
+install.packages("Matrix")
 ```
 
 # Introduction
@@ -58,7 +63,8 @@ Compare the model coefficients and the confidence intervals observed in this ass
 Read the datasets used in this assignment. Pay attention to the extensions of the datafiles.
 
 ```{r}
-
+df_A <- read_sav("C:/Users/flora/OneDrive/Dokumentumok/GitHub/elte-ppk-r-course-r_data_analysis-23_24_1/data/assignment_4_dataset_A.sav")
+df_B <- read_sav("C:/Users/flora/OneDrive/Dokumentumok/GitHub/elte-ppk-r-course-r_data_analysis-23_24_1/data/assignment_4_dataset_B.sav")
 ```
 
 ## Exploratory data analysis
@@ -66,7 +72,8 @@ Read the datasets used in this assignment. Pay attention to the extensions of th
 Run an exploratory data analysis (EDA) to investigate the dataset.
 
 ```{r}
-
+head(df_A)
+dim(df_A)
 ```
 
 ## Correct coding errors
