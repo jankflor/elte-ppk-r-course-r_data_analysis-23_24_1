@@ -15,6 +15,9 @@ oo <- options(repos = "https://cran.r-project.org/")
 utils::install.packages("Matrix")
 utils::install.packages("lme4")
 options(oo)
+library(lme4)
+install.packages("performance")
+library(performance)
 ```
 
 # Introduction
@@ -146,6 +149,8 @@ df_A %>%
   ggplot(aes(sex, pain)) +
   geom_col() +
   facet_grid(.~hospital)
+
+head(df_B)
 ```
 
 ## Correct coding errors
@@ -161,12 +166,19 @@ table(df_A$sex)
 ##Fit a linear mixed model on dataset A, with fixed effects and random intercept (hospital ID)
 
 ```{r}
-lmer(pain ~ sex + age + STAI_trait + pain_cat + cortisol_serum + mindfulness + (1 | hospital), data = df_A)
+model <- lmer(pain ~ sex + age + STAI_trait + pain_cat + cortisol_serum + mindfulness + (1 | hospital), data = df_A)
+summary(model)
+confint(model)
+model_performance(model)
 ```
 
 ##Use the previous regression equation on dataset B
 
 ```{r}
+model2 <- lmer(pain ~ sex + age + STAI_trait + pain_cat + cortisol_serum + mindfulness + (1 | hospital), data = df_B)
+summary(model2)
+confint(model2)
+model_performance(model2)
 
 ```
 
