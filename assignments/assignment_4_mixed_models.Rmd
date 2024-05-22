@@ -11,9 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 install.packages("haven")
 library(haven)
-install.packages("lme4")
-library(lme4)
-install.packages("Matrix")
+oo <- options(repos = "https://cran.r-project.org/")
+utils::install.packages("Matrix")
+utils::install.packages("lme4")
+options(oo)
 ```
 
 # Introduction
@@ -74,6 +75,77 @@ Run an exploratory data analysis (EDA) to investigate the dataset.
 ```{r}
 head(df_A)
 dim(df_A)
+summary(df_A)
+
+table(df_A$sex)
+
+ggplot(df_A, aes(age)) +
+  geom_density() +
+  labs(title = "Histogram of age in the sample")
+
+ggplot(df_A, aes(STAI_trait)) +
+  geom_histogram() +
+  labs(title = "Histogram of STAI values")
+
+min(df_A$STAI_trait)
+
+ggplot(df_A, aes(pain_cat)) +
+  geom_histogram() +
+  labs(title = "Histogram of pain catastrophizing values")
+
+ggplot(df_A, aes(cortisol_serum)) +
+  geom_histogram() +
+  labs(title = "Histogram of serum cortisol levels")
+
+ggplot(df_A, aes(mindfulness)) +
+  geom_histogram() +
+  labs(title = "Histogram of mindfulness values")
+
+ggplot(df_A, aes(STAI_trait, group = pain)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(title = "Boxplot of STAI scores by pain levels")
+
+round(cor(df_A[c("pain", "age", "STAI_trait", "pain_cat", "cortisol_serum", "mindfulness")]), 2)
+
+sapply(df_A, function(x) sum(is.na(x)))
+
+table(df_A$hospital)
+
+df_A %>%
+  ggplot(aes(pain)) +
+  geom_histogram() +
+  facet_grid(.~hospital)
+
+df_A %>%
+  ggplot(aes(STAI_trait, pain)) +
+  geom_col() +
+  facet_grid(.~hospital)
+
+df_A %>%
+  ggplot(aes(pain_cat, pain)) +
+  geom_col() +
+  facet_grid(.~hospital)
+
+df_A %>%
+  ggplot(aes(cortisol_serum, pain)) +
+  geom_col() +
+  facet_grid(.~hospital)
+
+df_A %>%
+  ggplot(aes(mindfulness, pain)) +
+  geom_col() +
+  facet_grid(.~hospital)
+
+df_A %>%
+  ggplot(aes(age, pain)) +
+  geom_col() +
+  facet_grid(.~hospital)
+
+df_A %>%
+  ggplot(aes(sex, pain)) +
+  geom_col() +
+  facet_grid(.~hospital)
 ```
 
 ## Correct coding errors
@@ -81,6 +153,24 @@ dim(df_A)
 If you find values in the dataset during the EDA, that are not correct based on the provided descriptions of the variables of the dataset please correct them here.
 
 ```{r}
+df_A[df_A$sex=='Male', 'sex'] <- 'male'
+
+table(df_A$sex)
+```
+
+##Fit a linear mixed model on dataset A, with fixed effects and random intercept (hospital ID)
+
+```{r}
+lmer(pain ~ sex + age + STAI_trait + pain_cat + cortisol_serum + mindfulness + (1 | hospital), data = df_A)
+```
+
+##Use the previous regression equation on dataset B
+
+```{r}
 
 ```
+
+##Report
+
+##Discussion
 
