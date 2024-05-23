@@ -175,14 +175,37 @@ model_performance(model)
 ##Use the previous regression equation on dataset B
 
 ```{r}
-model2 <- lmer(pain ~ sex + age + STAI_trait + pain_cat + cortisol_serum + mindfulness + (1 | hospital), data = df_B)
-summary(model2)
-confint(model2)
-model_performance(model2)
+df_B$pain = 3.502306 + -0.054400*df_B$age + 0.297545*df_B$sex +  0.001437*df_B$STAI_trait + 0.036885*df_B$pain_cat + 0.610010*df_B$cortisol_serum + -0.262441*df_B$mindfulness
 
+sse <- sum(resid(model2)^2)
+ssr <- sum((fitted(model2) - mean(df_B$pain))^2)
+sst <- sse + ssr
+expl_var <- 1- (ssr / sst)
 ```
 
-##Report
+##Results and discussion
 
-##Discussion
+Based on the exploratory data analysis, dataset A was cleaned and corrected for data entry errors and checked for outliers or unusual data.
+
+A linear mixed model was fitted for dataset A, with age, sex, STAI score, pain catastrophizing score, serum cortisol levels and mindfulness score as fixed effects and hospital as a random intercept. The model coefficients and confidence intervals can be seen below.
+
+```{r}
+fixef(model)
+
+confint(model)
+```
+
+Compared to the linear regression model fitted in Assignment 3, this model seems to be more exact in predictions. Coefficients for fixed effect predictors are very close to the coefficients of the predictors from the linear regression model, with a significant difference observed in STAI scores: in the previous exercise, STAI scores were in a negative relationship with reported pain levels, whereas in the current model, they are in a positive relationship with pain levels. Confidence intervals also seem to be more precise in the linear mixed model. This indicates that including a random intercept of hospitals is a reasonable decision, because it yields a better model fit.
+
+According to the performance diagnostics, the fixed effects of the linear mixed model explained 31.7% (marginal R^2) of the variance of reported pain levels. Fixed effects and random intercept combined (conditional R^2) explained 43.6% of the variance of pain levels. This number is better than the one in Assignment 3 (that one explained only 33.65% of the variance of the outcome variable). The residual variance of the mixed model is 56.4% (1-R^2).
+
+```{r}
+model_performance(model)
+
+residual_variance <- 1 - 0.436
+
+residual_variance
+```
+
+Using the regression equation derived from Model A to dataset B, we get an observed R^2 of 55.2%, which is higher than the R^2 in Model A. The predictions are not as precise as needed, therefore fitting a model on Model B would be required.
 

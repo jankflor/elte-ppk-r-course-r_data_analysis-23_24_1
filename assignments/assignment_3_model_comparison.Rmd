@@ -321,12 +321,7 @@ Create the more complex model based on the results of the model diagnostics. Als
 model_complex <- lm(pain ~ age + sex + STAI_trait + pain_cat + cortisol_serum + mindfulness, data = data2)
 summary(model_complex)
 
-confint(model_complex, 'age', level = 0.95)
-confint(model_complex, 'sex', level = 0.95)
-confint(model_complex, 'STAI_trait', level = 0.95)
-confint(model_complex, 'pain_cat', level = 0.95)
-confint(model_complex, 'cortisol_serum', level = 0.95)
-confint(model_complex, 'mindfulness', level = 0.95)
+confint(model_complex)
 
 tidy(model_complex)
 
