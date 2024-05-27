@@ -90,7 +90,6 @@ How many different ingredients you will need?
 
 ```{r}
 summary(ingredient_list)
-
 ```
 
 ## 5. What are the top 10 ingredients?
@@ -112,6 +111,7 @@ Count the number of ingredients and filter all the cocktails that has that many.
 cocktail_most_ingredients <- cocktail_df %>%
   count(name) %>%
   filter(n == max(n))
+cocktail_most_ingredients
 ```
 
 ## 7. How many ingredients appear in only one cocktail (rare ingredient)?
@@ -122,6 +122,7 @@ Count all cocktails with only one ingredient, and
 rare_ingredients <- cocktail_df %>%
   count(cocktail_ingredients) %>%
   filter(n == min(n))
+rare_ingredients
 ```
 
 ## 8. Which cocktail has an ingredient that is only used in one cocktail?
@@ -132,8 +133,7 @@ cocktail_w_rare <- cocktail_df %>%
   filter(cocktail_ingredients %in% rare_ingredients$cocktail_ingredients) %>%
   pull(name) %>%
   unique()
-
-
+cocktail_w_rare
 ```
 
 ## 9. What are the cocktails without rare ingredients?
@@ -144,6 +144,7 @@ cocktail_wo_rare <- cocktail_df %>%
   filter(!(name %in% cocktail_w_rare)) %>%
   pull(name) %>%
   unique()
+cocktail_wo_rare
 ```
 
 ## 10. Create a cheat sheet for the bartender!
@@ -159,8 +160,13 @@ tribble(~name, ~Lime, ~`White rum`, ~`Cane sugar`, ~`Coca-cola`, ~Mint, ~Soda,
 ```
 
 ```{r}
-tribble
+cocktail_list <- c("Pisco Sour", "Pink Lady", "Clover Club", "Whiskey Sour", "Daiquiri with More Lime", "Honeysuckle", "Classic Daiquiri", "Blood and Sand", "Alexander", "Hemingway Daiquiri", "Brown Derby", "Cosmopolitan (Modern/Bastardized)", "Gold Rush", "Southside", "Bee's Knees", "20th Century Cocktail", "Fresh Lime Gimlet", "Corpse Reviver #2", "Jack Rose", "Margarita", "Aviation", "Sidecar", "Champs-Elysses", "Last Word", "Between the Sheets", "Brady Crusta", "Pegu Club", "Blinker", "Negroni", "Blackthorn", "Hanky Panky", "Martinez", "Manhatan (Boubon, 45% abv)", "Bobby Burns", "Rob Roy", "Old Pal", "Vieux Carre", "Brooklyn", "Bijou", "Manhatan (Rye, 50% abv)", "Rusty Nail", "Improved Whiskey Cocktail", "De La Louisiane", "Widow's Kiss", "Old Fashioned", "Blender Daiquiri", "Blender Margarita", "Blender Whiskey Sour", "Carbonated Margarita", "Carbonated Whiskey Sour", "Gin and Tonic (Dry)", "Carbonated Negroni", "Gin and Juice Centrifuge", "Gin and Juice Agar", "Chartruth")
 
+mat <- matrix(, ncol = 62, nrow = 55)
+colnames(mat) <- ingredient_list
+rownames(mat) <- cocktail_list
+
+mat[] <- ifelse(ingredient_list %in% cocktail_data$ingredients, "X", "")
 ```
 
 
