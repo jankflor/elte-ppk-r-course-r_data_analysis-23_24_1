@@ -9,14 +9,8 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-install.packages("haven")
 library(haven)
-oo <- options(repos = "https://cran.r-project.org/")
-utils::install.packages("Matrix")
-utils::install.packages("lme4")
-options(oo)
 library(lme4)
-install.packages("performance")
 library(performance)
 ```
 
@@ -161,9 +155,11 @@ If you find values in the dataset during the EDA, that are not correct based on 
 df_A[df_A$sex=='Male', 'sex'] <- 'male'
 
 table(df_A$sex)
+
+as.factor(df_A$sex)
 ```
 
-##Fit a linear mixed model on dataset A, with fixed effects and random intercept (hospital ID)
+## Fit a linear mixed model on dataset A, with fixed effects and random intercept (hospital ID)
 
 ```{r}
 model <- lmer(pain ~ sex + age + STAI_trait + pain_cat + cortisol_serum + mindfulness + (1 | hospital), data = df_A)
@@ -172,10 +168,12 @@ confint(model)
 model_performance(model)
 ```
 
-##Use the previous regression equation on dataset B
+## Use the previous regression equation on dataset B
 
 ```{r}
-df_B$pain = 3.502306 + -0.054400*df_B$age + 0.297545*df_B$sex +  0.001437*df_B$STAI_trait + 0.036885*df_B$pain_cat + 0.610010*df_B$cortisol_serum + -0.262441*df_B$mindfulness
+df_B$pain = 3.502306 + -0.054400*df_B$age +  0.001437*df_B$STAI_trait + 0.036885*df_B$pain_cat + 0.610010*df_B$cortisol_serum + -0.262441*df_B$mindfulness
+
+model2 <- lmer(pain ~ sex + age + STAI_trait + pain_cat + cortisol_serum + mindfulness + (1 | hospital), data = df_B)
 
 sse <- sum(resid(model2)^2)
 ssr <- sum((fitted(model2) - mean(df_B$pain))^2)
@@ -183,7 +181,7 @@ sst <- sse + ssr
 expl_var <- 1- (ssr / sst)
 ```
 
-##Results and discussion
+## Results and discussion
 
 Based on the exploratory data analysis, dataset A was cleaned and corrected for data entry errors and checked for outliers or unusual data.
 

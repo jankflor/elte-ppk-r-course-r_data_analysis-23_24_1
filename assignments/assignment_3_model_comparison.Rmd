@@ -61,15 +61,10 @@ Read the dataset used in this assignment. Pay attention to the extension of the 
 ```{r}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-install.packages('broom')
 library(broom)
-install.packages("ggfortify")
 library(ggfortify)
-install.packages('car')
 library(car)
-install.packages("lmtest")
 library(lmtest)
-install.packages("AICcmodavg")
 library(AICcmodavg)
 
 assignment_3_dataset <- readxl::read_excel("C:/Users/flora/OneDrive/Dokumentumok/GitHub/elte-ppk-r-course-r_data_analysis-23_24_1/assignment_3_dataset.xls")
@@ -344,7 +339,7 @@ aictab(cand.set = models, modnames = mod.names)
 
 ```
 
-##Report
+## Report
 
 In the above analysis, it was explored how certain psychological and hormonal variables (such as state STAI value, pain catastrophizing or serum cortisol levels) affect reported pain levels in this sample. This more complex model was compared to a simpler model, with only participants' age and sex as predictor variables on reported pain levels.
 
@@ -360,6 +355,6 @@ Pain Level = 1.97850 + -0.03592*(age) + 0.31090*(sex) + -0.01130*(trait STAI) + 
 
 Comparing this, more complex model with the simple model (where age and sex predict pain levels), it is shown that the complex model has a better fit: it explains 33.65% of the variance of reported pain levels, whereas the simpler model only explains 7.61% of its variance. So the complex model explains more variance of the outcome variable (F = 15.501, p = 1.175e-10). The likelihood ratio test shows more likelihood of the more complex model happening (p = 4.347e-11). The Akaike Information Criteria analysis shows that the more complex model has less AIC value, therefore it is considered a better fit.
 
-##Discussion
+## Discussion
 
 According to the statistical analyses of the above data, it can be concluded that including psychological and hormonal measures to explain the variance of reported pain levels is a reasonable idea. In the complex model, pain catastrophizing and serum cortisol levels showed a statistically significant impact on pain levels, signifying that higher catastrophizing and higher cortisol levels might indicate a higher sensitivity to pain reception. Since a larger proportion of the variance of pain levels was explained by the complex model, I think substantially more predictive power was gained by using this extended model.

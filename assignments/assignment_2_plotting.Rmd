@@ -20,11 +20,8 @@ You will have to create 3 plots based on the datasets and instructions detailed 
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(tidytuesdayR)
-install.packages("viridis")
 library(viridis)
-install.packages("RColorBrewer")
 library(RColorBrewer)
-install.packages("ggrepel")
 library(ggrepel)
 library(scales)
 
