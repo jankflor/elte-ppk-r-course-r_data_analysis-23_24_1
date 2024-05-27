@@ -98,7 +98,9 @@ What are the 10 most frequently used ingredients? If there are ties, you can lis
 
 ```{r}
 top10_ingredients <- cocktail_df %>%
-  mutate(fct_lump_n(cocktail_ingredients, n = 10))
+  filter(cocktail_ingredients == fct_lump_n(cocktail_ingredients, n = 10)) %>%
+  pull(cocktail_ingredients) %>%
+  unique()
 
 top10_ingredients
 ```
@@ -160,13 +162,17 @@ tribble(~name, ~Lime, ~`White rum`, ~`Cane sugar`, ~`Coca-cola`, ~Mint, ~Soda,
 ```
 
 ```{r}
-cocktail_list <- c("Pisco Sour", "Pink Lady", "Clover Club", "Whiskey Sour", "Daiquiri with More Lime", "Honeysuckle", "Classic Daiquiri", "Blood and Sand", "Alexander", "Hemingway Daiquiri", "Brown Derby", "Cosmopolitan (Modern/Bastardized)", "Gold Rush", "Southside", "Bee's Knees", "20th Century Cocktail", "Fresh Lime Gimlet", "Corpse Reviver #2", "Jack Rose", "Margarita", "Aviation", "Sidecar", "Champs-Elysses", "Last Word", "Between the Sheets", "Brady Crusta", "Pegu Club", "Blinker", "Negroni", "Blackthorn", "Hanky Panky", "Martinez", "Manhatan (Boubon, 45% abv)", "Bobby Burns", "Rob Roy", "Old Pal", "Vieux Carre", "Brooklyn", "Bijou", "Manhatan (Rye, 50% abv)", "Rusty Nail", "Improved Whiskey Cocktail", "De La Louisiane", "Widow's Kiss", "Old Fashioned", "Blender Daiquiri", "Blender Margarita", "Blender Whiskey Sour", "Carbonated Margarita", "Carbonated Whiskey Sour", "Gin and Tonic (Dry)", "Carbonated Negroni", "Gin and Juice Centrifuge", "Gin and Juice Agar", "Chartruth")
+cocktail_matrix <- cocktail_df %>%
+  group_by(name, cocktail_ingredients) %>%
+  count() %>%
+  summarize(sum = sum(n)) %>%
+  spread(cocktail_ingredients, sum) %>%
+  as.matrix()
 
-mat <- matrix(, ncol = 62, nrow = 55)
-colnames(mat) <- ingredient_list
-rownames(mat) <- cocktail_list
+cocktail_matrix[cocktail_matrix == " 1"] <- "X"
+cocktail_matrix[is.na(cocktail_matrix)] <- ""
 
-mat[] <- ifelse(ingredient_list %in% cocktail_data$ingredients, "X", "")
+cocktail_matrix
 ```
 
 
