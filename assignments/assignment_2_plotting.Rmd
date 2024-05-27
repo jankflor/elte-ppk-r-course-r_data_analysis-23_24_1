@@ -24,6 +24,10 @@ install.packages("viridis")
 library(viridis)
 install.packages("RColorBrewer")
 library(RColorBrewer)
+install.packages("ggrepel")
+library(ggrepel)
+library(scales)
+
 ```
 
 ## Task 1: Climbing expeditions
@@ -74,26 +78,16 @@ phd_df <- phd_by_field[ , c('broad_field', 'year', 'n_phds')]
 phd_df %>%
   filter(n_phds != "NA") %>%
   group_by(broad_field, year) %>%
-  mutate(n_phds <- sum(n_phds)) %>%
+  mutate(year = as.Date(year),
+         n_phds = sum(n_phds)) %>%
   ggplot(aes(x = year, y = n_phds, color = broad_field, group = broad_field)) +
   geom_line(linewidth = 1.2) +
+  guides(color = guide_legend(title = "Broad field")) +
+  scale_x_continuous(breaks = breaks_pretty()) +
+  scale_y_continuous(labels = comma) +
   scale_color_brewer(palette = "Dark2") +
-  labs(fill = 'Broad field', title = "Number of awarded Ph.D.-s in the US by year",  x = NULL, y = NULL)
-
-ggplot(phd_by_field, aes(phd_by_field$year, phd_by_field$n_phds)) +
-  geom_point()
-
-total_phd_by_year <- phd_by_field %>%
-  filter(n_phds != "NA") %>%
-  group_by(broad_field, year) %>%
-  summarize(total_phd = sum(n_phds)) %>%
-  ggplot(aes(year, total_phd), color = broad_field) +
-  geom_line() +
-  scale_x_continuous(breaks = 2008:2017)
-
-ggplot(total_phd_by_year, aes(x = year, y = total_phd), color = broad_field) +
-  geom_line() +
-  labs(title = "Number of awarded Ph.D.-s in the US by year", x = NULL, y = NULL)
+  labs(fill = 'Broad field', title = "Number of awarded Ph.D.-s in the US by year",  x = NULL, y = NULL) +
+  theme(panel.border = element_blank())
 ```
 
 ## Task 3: Commute in the US
@@ -112,15 +106,19 @@ glimpse(commute)
 
 theme_set(theme_light())
 
-all_comm_by_state <- commute %>%
-  filter(!state == "Ca") %>%
-  mutate(transp = if_else(mode == "Bike", 1, 0)) %>%
-  group_by(state) %>%
-  summarize(all_comm = sum(transp)) %>%
-  ggplot(aes(mode, all_comm), color = state_region) +
-  geom_point() +
-  scale_x_log10() +
-  scale_y_log10()
+commute[commute$state=='Ca', 'state'] <- 'California'
+table(commute$state)
 
-all_comm_by_state
+commute %>%
+  group_by(state, mode, state_region, state_abb) %>%
+  summarise(sum = sum(n)) %>%
+  spread(key = mode, value = sum) %>%
+  ggplot(aes(Walk, Bike, color = state_region)) +
+  geom_point(size = 2) +
+  guides(color = guide_legend(title = "State region")) +
+  scale_x_log10(label=comma) +
+  scale_y_log10(label=comma) +
+  labs(fill = "State region", title = "Number of people walking vs. biking to work in each USA state", x = "Number of ppl walking to work (log N)", y = "Number of ppl biking to work (log N)") +
+  geom_text(aes(label = state_abb), color = "black", show.legend = FALSE, check_overlap = TRUE)
+
 ```
